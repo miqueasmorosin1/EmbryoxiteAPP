@@ -31,56 +31,56 @@ def add_particles():
     <style>
         /* Configuración del contenedor */
         #particles-js {
-            position: fixed; /* Se asegura de que el contenedor esté fijo */
+            position: fixed; /* Se asegura de que cubra toda la pantalla */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Para que esté detrás del contenido principal */
-            background-color: #ffffff; /* Fondo blanco */
+            z-index: -1; /* Detrás del contenido principal */
+            background-color: transparent; /* Fondo transparente */
         }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        /* Inicialización de las partículas */
+        /* Inicialización de partículas */
         particlesJS("particles-js", {
             "particles": {
                 "number": {
-                    "value": 80,
+                    "value": 100, /* Número de partículas */
                     "density": {
                         "enable": true,
                         "value_area": 800
                     }
                 },
                 "color": {
-                    "value": "#000000" /* Partículas negras */
+                    "value": "#000000" /* Color de las partículas: negro */
                 },
                 "shape": {
-                    "type": "circle",
+                    "type": "circle", /* Forma circular */
                     "stroke": {
                         "width": 0,
                         "color": "#000000"
                     }
                 },
                 "opacity": {
-                    "value": 0.5,
+                    "value": 0.5, /* Opacidad media */
                     "random": false
                 },
                 "size": {
                     "value": 3,
-                    "random": true
+                    "random": true /* Tamaños variados */
                 },
                 "line_linked": {
-                    "enable": true,
+                    "enable": true, /* Líneas entre partículas */
                     "distance": 150,
                     "color": "#000000", /* Líneas negras */
                     "opacity": 0.4,
                     "width": 1
                 },
                 "move": {
-                    "enable": true,
-                    "speed": 6,
+                    "enable": true, /* Movimiento activado */
+                    "speed": 6, /* Velocidad del movimiento */
                     "direction": "none",
                     "random": false,
                     "straight": false,
@@ -93,21 +93,21 @@ def add_particles():
                 "events": {
                     "onhover": {
                         "enable": true,
-                        "mode": "repulse"
+                        "mode": "repulse" /* Repulsión al pasar el mouse */
                     },
                     "onclick": {
                         "enable": true,
-                        "mode": "push"
+                        "mode": "push" /* Agregar partículas al hacer clic */
                     },
                     "resize": true
                 }
             },
-            "retina_detect": true
+            "retina_detect": true /* Optimización para pantallas retina */
         });
     </script>
     """
     # Renderizar el HTML en Streamlit
-    st.components.v1.html(particles_html, height=0, width=0)
+    st.components.v1.html(particles_html, height=600, width=0)
 st.title("Embryo Transfer Prioritization")
 add_particles()
 threshold = 0.8
