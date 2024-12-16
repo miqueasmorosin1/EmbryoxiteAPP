@@ -1,0 +1,17 @@
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+tensorflow
+keras
+numpy
+joblib
+opencv-python-headless
+plotly
+Pillow==9.5.0
+streamlit
+gspread
+gcsfs
+st-files-connection
+scikit-learn
+matplotlib
+pandas
