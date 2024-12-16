@@ -18,7 +18,6 @@ from google.oauth2 import service_account
 import gc
 from keras import backend as K
 
-# --- Configuración de Streamlit ---
 st.set_page_config(
     page_title="Embryo Analysis",
     page_icon="🔬",
@@ -26,6 +25,34 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# --- Fondo dinámico usando HTML y CSS ---
+def add_background():
+    background_animation = """
+    <style>
+    body {
+        background: linear-gradient(270deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Ajustes de la clase principal de Streamlit */
+    .stApp {
+        background: transparent; /* Asegura que el contenido sea visible */
+    }
+    </style>
+    """
+    st.markdown(background_animation, unsafe_allow_html=True)
+
+# Llamar a la función para agregar el fondo
+add_background()
+
+# --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
 threshold = 0.8
 
