@@ -26,11 +26,11 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-def add_background():
-    background_animation = """
+def set_background():
+    background_style = """
     <style>
-    body {
-        background: linear-gradient(270deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+    .stApp {
+        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
         background-size: 400% 400%;
         animation: gradientBG 15s ease infinite;
     }
@@ -40,17 +40,12 @@ def add_background():
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
-
-    /* Ajustes de la clase principal de Streamlit */
-    .stApp {
-        background: transparent; /* Asegura que el contenido sea visible */
-    }
     </style>
     """
-    st.markdown(background_animation, unsafe_allow_html=True)
+    st.markdown(background_style, unsafe_allow_html=True)
 
-# Llamar a la función para agregar el fondo
-add_background()
+# Llamar a la función para configurar el fondo
+set_background()
 
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
