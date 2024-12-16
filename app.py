@@ -119,7 +119,7 @@ def add_particles(y,x):
     # Renderizar el HTML en Streamlit
     st.components.v1.html(particles_html, height=y, width=x)
 st.title("Embryo Transfer Prioritization")
-add_particles(300,3000)
+add_particles(300,2000)
 threshold = 0.8
 
 # --- Configuración de Google Drive ---
