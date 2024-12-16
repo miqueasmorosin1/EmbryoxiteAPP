@@ -16,6 +16,7 @@ import os
 import io
 from google.oauth2 import service_account
 import gc
+from keras import backend as K
 
 # --- Configuración de Streamlit ---
 st.set_page_config(
@@ -252,6 +253,9 @@ def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
     )
     return fig
 
+def cleanup():
+    K.clear_session()  # Limpia memoria usada por Keras/TensorFlow
+    gc.collect() 
 # --- Interfaz de usuario ---
 col1, col2 = st.columns(2)
 with col1:
@@ -265,32 +269,43 @@ with col1:
     
         if st.button("Procesar Video"):
             progress_message = st.empty()
+
+            # Limpia recursos previos
+            gc.collect()
+            
+            # Proceso 1: Eliminando errores
             progress_message.write("Eliminando Errores...")
             frame_results_rf = process_video_vgg_rf_batches(temp_video_path)
-        
+            progress_message.empty()
+            
+            # Proceso 2: Procesando video
             progress_message.write("Procesando Video...")
             keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
+            progress_message.empty()
+            
+            # Proceso 3: Comparando últimos frames
+            progress_message.write("Comparando últimos frames con la imagen de referencia...")
             image_path = "apl/apl_Missing.png"
             similar_frames = compare_last_frames_with_image(temp_video_path, image_path)
+            progress_message.empty()
     
             frame_results_rf = [(frame_number, pred) for frame_number, pred in frame_results_rf if frame_number not in similar_frames]
             keras_results = [(frame_number, prob) for frame_number, prob in keras_results if frame_number not in similar_frames]
             results = (frame_results_rf, keras_results)
+
+            # Liberar recursos después del procesamiento
+            del video_file
+            cleanup()
         else:
             results = None
     else:
         results = None
 with col2:
     if results:
-        progress_message = st.empty()
         frame_results_rf, keras_results = results
-        progress_message.write("Generando gráfico...")
+        st.write("Generando gráfico...")
         fig = generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=threshold)
         if fig:
             st.plotly_chart(fig)
     else:
         st.info("Cargue un video y presione 'Procesar Video' para ver el gráfico.")
-
-
-    del video_file
-    gc.collect()
