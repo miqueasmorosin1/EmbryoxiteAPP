@@ -52,7 +52,7 @@ def get_drive_service():
         creds_info, scopes=['https://www.googleapis.com/auth/drive'])
     return build('drive', 'v3', credentials=creds)
 
-drive_service = get_drive_service()
+rive_service = get_drive_service()
 
 def download_from_drive(file_id, destination_path):
     request = drive_service.files().get_media(fileId=file_id)
@@ -69,6 +69,10 @@ def download_from_drive(file_id, destination_path):
 def load_models():
     keras_model_path = "modelo_T_D_final.keras"
     rf_model_path = "modelo_randomforest_blanco.pkl"
+
+    # Descargar modelos desde Google Drive
+    download_from_drive(os.getenv("MODEL_KERAS_ID"), keras_model_path)
+    download_from_drive(os.getenv("RF_MODEL_ID"), rf_model_path)
 
     # Cargar modelos
     transfer_model = load_model(keras_model_path)
