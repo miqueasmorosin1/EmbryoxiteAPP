@@ -20,7 +20,7 @@ from keras import backend as K
 
 st.set_page_config(
     page_title="Embryo Analysis",
-    page_icon="🔬",
+    page_icon="apl/image.ico",
     layout="wide",
     initial_sidebar_state="expanded",
 )
