@@ -15,6 +15,7 @@ import streamlit as st
 import os
 import io
 from google.oauth2 import service_account
+import gc
 
 # --- Configuración de Streamlit ---
 st.set_page_config(
