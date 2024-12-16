@@ -33,21 +33,23 @@ particles_code = """
 <head>
     <style>
         /* ---- Reset básico ---- */
-        body {
+        html, body {
             margin: 0;
-            font: normal 75% Arial, Helvetica, sans-serif;
-            background: white; /* Fondo blanco */
-            color: black; /* Texto en negro */
-        }
-        canvas {
-            display: block;
-            vertical-align: bottom;
-        }
-        /* ---- Contenedor de Particles.js ---- */
-        #particles-js {
-            position: absolute;
+            padding: 0;
             width: 100%;
             height: 100%;
+            overflow: hidden; /* Evita barras de desplazamiento */
+        }
+        .stApp {
+            position: relative;
+            z-index: 0; /* Permite que el fondo quede detrás */
+        }
+        #particles-js {
+            position: fixed; /* Fijo para cubrir toda la pantalla */
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
             z-index: -1; /* Fondo detrás del contenido */
             background-color: white; /* Fondo blanco */
         }
@@ -128,7 +130,7 @@ particles_code = """
 """
 
 # Renderizar el HTML en Streamlit
-html(particles_code, height=600)
+html(particles_code, height=0)
 
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
