@@ -145,12 +145,15 @@ def process_video_vgg_rf_parallel(video_path, vgg_model, rf_model, batch_size=32
     return frame_results
 
 # --- Predicción con el modelo Keras ---
-def process_video_keras(video_path):
+def process_video_keras(video_path, batch_size=1):
+    import tensorflow as tf
+    tf.keras.mixed_precision.set_global_policy('mixed_float16')  # Reducir uso de memoria
+
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     keras_results = []
 
-    st.write("Procesando video con modelo Keras...")
+    st.write("Procesando video con modelo Keras (Optimizado)...")
     progress_bar = st.progress(0)
     processed_frames = 0
 
@@ -160,15 +163,31 @@ def process_video_keras(video_path):
             break
 
         frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+
+        # Procesar 1 de cada 5 frames para ahorrar memoria y tiempo
+        if frame_number % 5 != 0:
+            continue
+
+        # Preprocesar frame
         frame_preprocessed = preprocess_frame(frame)
-        prediction = transfer_model.predict(np.expand_dims(frame_preprocessed, axis=0))[0][0]
+
+        # Predicción con modelo Keras
+        prediction = transfer_model.predict(np.expand_dims(frame_preprocessed, axis=0), batch_size=batch_size)[0][0]
+
+        # Guardar resultados
         keras_results.append((frame_number, prediction))
 
+        # Progreso
         processed_frames += 1
         progress_bar.progress(processed_frames / total_frames)
 
+        # Liberar memoria
+        del frame, frame_preprocessed, prediction
+        gc.collect()
+
     cap.release()
     progress_bar.empty()
+    gc.collect()  # Liberar recursos restantes
     return keras_results
 
 # --- Generación del gráfico ---
