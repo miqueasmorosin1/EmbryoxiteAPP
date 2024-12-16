@@ -26,50 +26,23 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-def set_molecular_background():
-    css_style = """
+def set_image_background():
+    image_url = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/apl/image1.png"  # URL directa a tu imagen
+
+    css = f"""
     <style>
-    .stApp {
-        background-color: #0f0f0f; /* Fondo oscuro */
-        overflow: hidden;
-        position: relative;
-    }
-
-    .circle {
-        position: absolute;
-        border-radius: 50%;
-        background-color: rgba(0, 212, 255, 0.5);
-        animation: move 10s linear infinite;
-    }
-
-    /* Crear animación */
-    @keyframes move {
-        0% {
-            transform: translateY(0) translateX(0);
-        }
-        50% {
-            transform: translateY(-100px) translateX(100px);
-        }
-        100% {
-            transform: translateY(0) translateX(0);
-        }
-    }
-
-    /* Posicionar múltiples círculos */
-    .circle:nth-child(1) { width: 50px; height: 50px; top: 10%; left: 20%; animation-duration: 12s; }
-    .circle:nth-child(2) { width: 80px; height: 80px; top: 30%; left: 50%; animation-duration: 15s; }
-    .circle:nth-child(3) { width: 60px; height: 60px; top: 50%; left: 10%; animation-duration: 10s; }
-    .circle:nth-child(4) { width: 100px; height: 100px; top: 70%; left: 60%; animation-duration: 18s; }
+    .stApp {{
+        background-image: url("{image_url}");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
     </style>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
     """
-    st.markdown(css_style, unsafe_allow_html=True)
+    st.markdown(css, unsafe_allow_html=True)
 
-# Aplicar fondo molecular
-set_molecular_background()
+# Llamada a la función
+set_image_background()
 
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
