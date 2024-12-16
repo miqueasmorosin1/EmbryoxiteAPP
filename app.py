@@ -24,7 +24,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-def add_particles():
+def add_particles(y,x):
     particles_html = """
     <div id="particles-js"></div>
 
@@ -117,9 +117,9 @@ def add_particles():
     </script>
     """
     # Renderizar el HTML en Streamlit
-    st.components.v1.html(particles_html, height=300, width=3000)
+    st.components.v1.html(particles_html, height=y, width=x)
 st.title("Embryo Transfer Prioritization")
-add_particles()
+add_particles(300,3000)
 threshold = 0.8
 
 # --- Configuración de Google Drive ---
@@ -402,6 +402,6 @@ with col2:
             st.plotly_chart(fig)
     else:
         st.info("Cargue un video y presione 'Procesar Video' para ver el gráfico.")
-    add_particles()
+    add_particles(1000,3000)
 
-add_particles()
+add_particles(300,3000)
