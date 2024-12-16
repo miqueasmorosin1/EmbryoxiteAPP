@@ -208,14 +208,17 @@ if video_file:
     st.video(temp_video_path)
 
     if st.button("Procesar Video"):
-        frame_results_rf = process_video_vgg_rf_parallel(temp_video_path)
+        st.write("Procesando video con VGG16 + RF...")
+        frame_results_rf = process_video_vgg_rf_parallel(temp_video_path, vgg_model, rf_model)
+        st.write("Procesando video con modelo Keras...")
         keras_results = process_video_keras(temp_video_path)
+        st.write("Generando gráfico...")
         fig = generate_plot(frame_results_rf, keras_results, threshold)
         if fig:
             st.plotly_chart(fig)
-
-    # Liberar memoria después de procesar
-    del video_file, temp_video_path
-    gc.collect()
+    
+        # Liberar memoria después de procesar
+        del video_file, temp_video_path
+        gc.collect()
 
 
