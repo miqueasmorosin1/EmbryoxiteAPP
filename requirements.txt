@@ -16,4 +16,3 @@ scikit-learn
 matplotlib
 pandas
 scikit-image
-streamlit-particles
