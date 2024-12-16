@@ -16,6 +16,8 @@ import os
 import io
 import gc
 from google.oauth2 import service_account
+from concurrent.futures import ThreadPoolExecutor
+
 
 # --- Configuración de Streamlit ---
 st.set_page_config(
@@ -89,33 +91,57 @@ def preprocess_frame(frame):
     return preprocess_input(frame_resized)
 
 # --- Procesamiento del video en *streaming* ---
-def process_video_vgg_rf(video_path):
+def process_batch(frames_batch, vgg_model, rf_model):
+    features = vgg_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
+    rf_predictions = rf_model.predict(features)
+    results = [(i, pred) for i, pred in enumerate(rf_predictions) if pred == 1]
+    return results
+
+def process_video_vgg_rf_parallel(video_path, vgg_model, rf_model, batch_size=32):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_results = []
+    frames_batch = []
+    frame_numbers_batch = []
 
-    st.write("Procesando video con VGG16 + RF...")
+    st.write("Procesando video en paralelo...")
     progress_bar = st.progress(0)
     processed_frames = 0
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    with ThreadPoolExecutor() as executor:
+        futures = []
 
-        frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-        frame_preprocessed = preprocess_frame(frame)
-        features = vgg_model.predict(np.expand_dims(frame_preprocessed, axis=0))
-        rf_prediction = rf_model.predict(features)
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        if rf_prediction[0] == 1:  # Solo guardar frames etiquetados como "Embrion"
-            frame_results.append((frame_number, 1))
+            frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+            frames_batch.append(preprocess_frame(frame))
+            frame_numbers_batch.append(frame_number)
 
-        processed_frames += 1
-        progress_bar.progress(processed_frames / total_frames)
+            if len(frames_batch) == batch_size:
+                # Enviar el batch a un thread
+                futures.append(executor.submit(process_batch, frames_batch, vgg_model, rf_model))
+
+                # Resetear el batch
+                frames_batch = []
+                frame_numbers_batch = []
+
+            processed_frames += 1
+            progress_bar.progress(processed_frames / total_frames)
+
+        # Procesar frames restantes
+        if frames_batch:
+            futures.append(executor.submit(process_batch, frames_batch, vgg_model, rf_model))
+
+        # Recoger resultados
+        for future in futures:
+            frame_results.extend(future.result())
 
     cap.release()
     progress_bar.empty()
+    gc.collect()  # Liberar memoria
     return frame_results
 
 # --- Predicción con el modelo Keras ---
