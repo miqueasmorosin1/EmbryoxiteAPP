@@ -54,7 +54,7 @@ def add_particles():
                     }
                 },
                 "color": {
-                    "value": "#000000" /* Color de las partículas: negro */
+                    "value": "#FFFFFF" /* Color de las partículas: negro */
                 },
                 "shape": {
                     "type": "circle", /* Forma circular */
@@ -74,7 +74,7 @@ def add_particles():
                 "line_linked": {
                     "enable": true, /* Líneas entre partículas */
                     "distance": 150,
-                    "color": "#000000", /* Líneas negras */
+                    "color": "#FFFFFF", /* Líneas negras */
                     "opacity": 0.4,
                     "width": 1
                 },
