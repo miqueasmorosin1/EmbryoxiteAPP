@@ -28,106 +28,89 @@ st.set_page_config(
 
 # --- Fondo dinámico usando HTML y CSS ---
 particles_code = """
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        /* ---- Reset básico ---- */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Evita barras de desplazamiento */
-        }
-        .stApp {
-            background: transparent; /* Fondo transparente para Streamlit */
-            position: relative;
-            z-index: 1; /* Contenido encima del fondo */
-        }
-        #particles-js {
-            position: fixed; /* Fijo para cubrir toda la pantalla */
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 0; /* Fondo detrás del contenido */
-            background-color: white; /* Fondo blanco */
-        }
-    </style>
-</head>
-<body>
-    <!-- Contenedor para Particles.js -->
-    <div id="particles-js"></div>
-
-    <!-- Script de configuración para Particles.js -->
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": {
-                    "value": 80,
-                    "density": {
-                        "enable": true,
-                        "value_area": 800
-                    }
-                },
-                "color": {
-                    "value": "#000000" /* Partículas en negro */
-                },
-                "shape": {
-                    "type": "circle",
-                    "stroke": {
-                        "width": 0,
-                        "color": "#000000"
-                    }
-                },
-                "opacity": {
-                    "value": 0.5,
-                    "random": false
-                },
-                "size": {
-                    "value": 3,
-                    "random": true
-                },
-                "line_linked": {
+<div id="particles-js"></div>
+<style>
+    /* Fondo de partículas */
+    #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: -1; /* Asegura que esté detrás del contenido */
+    }
+    /* Configuración de Streamlit */
+    .stApp {
+        background: rgba(0, 0, 0, 0); /* Fondo transparente */
+        position: relative;
+        z-index: 1; /* Contenido encima del fondo */
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    particlesJS("particles-js", {
+        "particles": {
+            "number": {
+                "value": 80,
+                "density": {
                     "enable": true,
-                    "distance": 150,
-                    "color": "#000000", /* Líneas en negro */
-                    "opacity": 0.4,
-                    "width": 1
-                },
-                "move": {
-                    "enable": true,
-                    "speed": 6,
-                    "direction": "none",
-                    "random": false
+                    "value_area": 800
                 }
             },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": {
-                    "onhover": {
-                        "enable": true,
-                        "mode": "repulse"
-                    },
-                    "onclick": {
-                        "enable": true,
-                        "mode": "push"
-                    }
-                },
-                "modes": {
-                    "repulse": {
-                        "distance": 100,
-                        "duration": 0.4
-                    }
+            "color": {
+                "value": "#000000" /* Partículas en negro */
+            },
+            "shape": {
+                "type": "circle",
+                "stroke": {
+                    "width": 0,
+                    "color": "#000000"
                 }
             },
-            "retina_detect": true
-        });
-    </script>
-</body>
-</html>
+            "opacity": {
+                "value": 0.5,
+                "random": false
+            },
+            "size": {
+                "value": 3,
+                "random": true
+            },
+            "line_linked": {
+                "enable": true,
+                "distance": 150,
+                "color": "#000000", /* Líneas en negro */
+                "opacity": 0.4,
+                "width": 1
+            },
+            "move": {
+                "enable": true,
+                "speed": 6,
+                "direction": "none",
+                "random": false
+            }
+        },
+        "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+                "onhover": {
+                    "enable": true,
+                    "mode": "repulse"
+                },
+                "onclick": {
+                    "enable": true,
+                    "mode": "push"
+                }
+            },
+            "modes": {
+                "repulse": {
+                    "distance": 100,
+                    "duration": 0.4
+                }
+            }
+        },
+        "retina_detect": true
+    });
+</script>
 """
 
 # Renderizar el HTML en Streamlit
