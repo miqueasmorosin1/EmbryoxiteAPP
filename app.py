@@ -27,41 +27,41 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-css_background = """
+css_code = """
 <style>
-    /* Fondo animado global */
-    body {
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
-        background-size: 400% 400%;
-        animation: gradientBackground 15s ease infinite;
-    }
+/* Fondo animado */
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
 
-    /* Animación del fondo */
-    @keyframes gradientBackground {
-        0% {
-            background-position: 0% 50%;
-        }
-        50% {
-            background-position: 100% 50%;
-        }
-        100% {
-            background-position: 0% 50%;
-        }
+/* Animación del gradiente */
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
     }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
 
-    /* Ajustar la posición del contenido principal de Streamlit */
-    .stApp {
-        background: transparent !important;
-        position: relative;
-        z-index: 1;
-    }
+/* Ajustes del contenido de Streamlit */
+.stApp {
+    background: transparent !important;
+    position: relative;
+    z-index: 1;
+}
 </style>
 """
 
-# Inyectar CSS global en la aplicación
-st.markdown(css_background, unsafe_allow_html=True)
+# Inyectar CSS directamente en Streamlit
+st.markdown(css_code, unsafe_allow_html=True)
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
 threshold = 0.8
