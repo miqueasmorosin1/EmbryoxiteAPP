@@ -17,7 +17,7 @@ import io
 import gc
 from google.oauth2 import service_account
 from concurrent.futures import ThreadPoolExecutor
-
+from tensorflow import lite
 
 # --- Configuración de Streamlit ---
 st.set_page_config(
@@ -63,27 +63,19 @@ def download_from_drive(file_id, destination_path):
 
 # --- Cargar modelos ---
 @st.cache_resource
-def load_models():
-    keras_model_path = "modelo_T_D_final.keras"
-    rf_model_path = "modelo_randomforest_blanco.pkl"
+def load_transfer_model():
+    return load_model("modelo_T_D_final.keras")
 
-    # Descargar modelos desde Google Drive
-    download_from_drive(os.getenv("MODEL_KERAS_ID"), keras_model_path)
-    download_from_drive(os.getenv("RF_MODEL_ID"), rf_model_path)
+@st.cache_resource
+def load_rf_model():
+    return load("modelo_randomforest_blanco.pkl")
 
-    # Cargar modelos
-    transfer_model = load_model(keras_model_path)
-    rf_model = load(rf_model_path)
-
-    # Modelo VGG16 recortado
+@st.cache_resource
+def load_vgg_model():
     vgg16_base = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
     x = vgg16_base.get_layer('block2_pool').output
-    x = GlobalAveragePooling2D()(x)
-    vgg_model = Model(inputs=vgg16_base.input, outputs=x)
+    return Model(inputs=vgg16_base.input, outputs=GlobalAveragePooling2D()(x))
 
-    return transfer_model, rf_model, vgg_model
-
-transfer_model, rf_model, vgg_model = load_models()
 
 # --- Preprocesamiento de fotogramas ---
 def preprocess_frame(frame):
@@ -145,10 +137,7 @@ def process_video_vgg_rf_parallel(video_path, vgg_model, rf_model, batch_size=32
     return frame_results
 
 # --- Predicción con el modelo Keras ---
-def process_video_keras(video_path, batch_size=1):
-    import tensorflow as tf
-    tf.keras.mixed_precision.set_global_policy('mixed_float16')  # Reducir uso de memoria
-
+def process_video_keras(video_path, transfer_model, batch_size=1):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     keras_results = []
@@ -164,17 +153,15 @@ def process_video_keras(video_path, batch_size=1):
 
         frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
 
-        # Procesar 1 de cada 5 frames para ahorrar memoria y tiempo
+        # Procesar 1 de cada 5 frames
         if frame_number % 5 != 0:
             continue
 
         # Preprocesar frame
-        frame_preprocessed = preprocess_frame(frame)
+        frame_resized = preprocess_input(cv2.resize(frame, (224, 224)))
 
-        # Predicción con modelo Keras
-        prediction = transfer_model.predict(np.expand_dims(frame_preprocessed, axis=0), batch_size=batch_size)[0][0]
-
-        # Guardar resultados
+        # Predicción
+        prediction = transfer_model.predict(np.expand_dims(frame_resized, axis=0), batch_size=batch_size)[0][0]
         keras_results.append((frame_number, prediction))
 
         # Progreso
@@ -182,12 +169,11 @@ def process_video_keras(video_path, batch_size=1):
         progress_bar.progress(processed_frames / total_frames)
 
         # Liberar memoria
-        del frame, frame_preprocessed, prediction
+        del frame, frame_resized, prediction
         gc.collect()
 
     cap.release()
     progress_bar.empty()
-    gc.collect()  # Liberar recursos restantes
     return keras_results
 
 # --- Generación del gráfico ---
@@ -218,26 +204,33 @@ def generate_plot(frame_results_rf, keras_results, threshold):
     return fig
 
 # --- Interfaz de usuario ---
+st.title("Embryo Transfer Prioritization")
 video_file = st.file_uploader("Sube un video", type=['mp4', 'avi', 'mov'])
+
 if video_file:
     temp_video_path = f"/tmp/{video_file.name}"
     with open(temp_video_path, 'wb') as f:
         f.write(video_file.read())
 
-    st.video(temp_video_path)
-
     if st.button("Procesar Video"):
+        st.write("Cargando modelos...")
+        transfer_model = load_transfer_model()
+        rf_model = load_rf_model()
+        vgg_model = load_vgg_model()
+
         st.write("Procesando video con VGG16 + RF...")
         frame_results_rf = process_video_vgg_rf_parallel(temp_video_path, vgg_model, rf_model)
+
         st.write("Procesando video con modelo Keras...")
-        keras_results = process_video_keras(temp_video_path)
+        keras_results = process_video_keras(temp_video_path, transfer_model)
+
         st.write("Generando gráfico...")
-        fig = generate_plot(frame_results_rf, keras_results, threshold)
+        fig = generate_plot(frame_results_rf, keras_results, threshold=0.8)
         if fig:
             st.plotly_chart(fig)
-    
-        # Liberar memoria después de procesar
-        del video_file, temp_video_path
+
+        # Liberar recursos
+        del video_file, temp_video_path, transfer_model, rf_model, vgg_model
         gc.collect()
 
 
