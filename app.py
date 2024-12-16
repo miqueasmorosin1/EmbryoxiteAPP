@@ -117,7 +117,7 @@ def add_particles():
     </script>
     """
     # Renderizar el HTML en Streamlit
-    st.components.v1.html(particles_html, height=600, width=100)
+    st.components.v1.html(particles_html, height=600, width=1000)
 st.title("Embryo Transfer Prioritization")
 add_particles()
 threshold = 0.8
