@@ -27,118 +27,41 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-css_animation_code = """
-<div class="background">
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-</div>
+css_background = """
 <style>
-    /* Fondo animado */
-    .background {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        z-index: -1; /* Coloca el fondo detrás del contenido */
-        background: linear-gradient(to bottom, #ffffff, #e6f7ff);
-        overflow: hidden;
+    /* Fondo animado global */
+    body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+        background-size: 400% 400%;
+        animation: gradientBackground 15s ease infinite;
     }
 
-    /* Estilo de las burbujas */
-    .bubble {
-        position: absolute;
-        bottom: -100px;
-        width: 40px;
-        height: 40px;
-        background-color: rgba(0, 150, 255, 0.2);
-        border-radius: 50%;
-        animation: rise 10s infinite ease-in-out;
-    }
-
-    /* Animación de las burbujas */
-    @keyframes rise {
+    /* Animación del fondo */
+    @keyframes gradientBackground {
         0% {
-            transform: translateY(0) scale(1);
-            opacity: 1;
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
         }
         100% {
-            transform: translateY(-110vh) scale(0.5);
-            opacity: 0;
+            background-position: 0% 50%;
         }
     }
 
-    /* Genera burbujas de tamaños y posiciones aleatorias */
-    .bubble:nth-child(1) {
-        left: 10%;
-        width: 80px;
-        height: 80px;
-        animation-duration: 12s;
-    }
-    .bubble:nth-child(2) {
-        left: 20%;
-        animation-duration: 15s;
-        animation-delay: 3s;
-    }
-    .bubble:nth-child(3) {
-        left: 30%;
-        animation-duration: 10s;
-        animation-delay: 6s;
-    }
-    .bubble:nth-child(4) {
-        left: 40%;
-        width: 60px;
-        height: 60px;
-        animation-duration: 8s;
-        animation-delay: 2s;
-    }
-    .bubble:nth-child(5) {
-        left: 50%;
-        animation-duration: 14s;
-        animation-delay: 4s;
-    }
-    .bubble:nth-child(6) {
-        left: 60%;
-        width: 100px;
-        height: 100px;
-        animation-duration: 20s;
-        animation-delay: 8s;
-    }
-    .bubble:nth-child(7) {
-        left: 70%;
-        animation-duration: 18s;
-        animation-delay: 1s;
-    }
-    .bubble:nth-child(8) {
-        left: 80%;
-        animation-duration: 12s;
-        animation-delay: 5s;
-    }
-    .bubble:nth-child(9) {
-        left: 90%;
-        width: 120px;
-        height: 120px;
-        animation-duration: 16s;
-        animation-delay: 7s;
-    }
-    .bubble:nth-child(10) {
-        left: 95%;
-        animation-duration: 14s;
-        animation-delay: 6s;
+    /* Ajustar la posición del contenido principal de Streamlit */
+    .stApp {
+        background: transparent !important;
+        position: relative;
+        z-index: 1;
     }
 </style>
 """
 
-# Renderizar el fondo animado en Streamlit
-html(css_animation_code, height=0)
+# Inyectar CSS global en la aplicación
+st.markdown(css_background, unsafe_allow_html=True)
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
 threshold = 0.8
