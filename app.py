@@ -27,86 +27,50 @@ st.set_page_config(
 
 # --- Fondo dinámico usando HTML y CSS ---
 def set_molecular_background():
-    # HTML y CSS para el fondo animado
-    molecular_style = """
+    css_style = """
     <style>
-    body {
-        margin: 0;
-        overflow: hidden;
-    }
-
     .stApp {
-        position: relative;
         background-color: #0f0f0f; /* Fondo oscuro */
+        overflow: hidden;
+        position: relative;
     }
 
-    #particles-js {
+    .circle {
         position: absolute;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
+        border-radius: 50%;
+        background-color: rgba(0, 212, 255, 0.5);
+        animation: move 10s linear infinite;
     }
-    </style>
-    <div id="particles-js"></div>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        particlesJS("particles-js", {
-          "particles": {
-            "number": {
-              "value": 100,
-              "density": { "enable": true, "value_area": 800 }
-            },
-            "color": { "value": "#00d4ff" }, /* Color de las moléculas */
-            "shape": {
-              "type": "circle",
-              "stroke": { "width": 0, "color": "#000000" },
-              "polygon": { "nb_sides": 5 }
-            },
-            "opacity": { "value": 0.5, "random": true },
-            "size": { "value": 4, "random": true },
-            "line_linked": {
-              "enable": true,
-              "distance": 150,
-              "color": "#00d4ff",
-              "opacity": 0.4,
-              "width": 1
-            },
-            "move": {
-              "enable": true,
-              "speed": 3,
-              "direction": "none",
-              "random": false,
-              "straight": false,
-              "out_mode": "out",
-              "attract": { "enable": true, "rotateX": 600, "rotateY": 1200 }
-            }
-          },
-          "interactivity": {
-            "detect_on": "canvas",
-            "events": {
-              "onhover": { "enable": true, "mode": "repulse" },
-              "onclick": { "enable": true, "mode": "push" },
-              "resize": true
-            },
-            "modes": {
-              "grab": { "distance": 400, "line_linked": { "opacity": 1 } },
-              "bubble": { "distance": 400, "size": 10, "duration": 2, "opacity": 0.8 },
-              "repulse": { "distance": 150, "duration": 0.4 },
-              "push": { "particles_nb": 4 },
-              "remove": { "particles_nb": 2 }
-            }
-          },
-          "retina_detect": true
-        });
-    });
-    </script>
-    """
-    # Renderizar en la app de Streamlit
-    st.markdown(molecular_style, unsafe_allow_html=True)
 
-# Llamar a la función para establecer el fondo molecular
+    /* Crear animación */
+    @keyframes move {
+        0% {
+            transform: translateY(0) translateX(0);
+        }
+        50% {
+            transform: translateY(-100px) translateX(100px);
+        }
+        100% {
+            transform: translateY(0) translateX(0);
+        }
+    }
+
+    /* Posicionar múltiples círculos */
+    .circle:nth-child(1) { width: 50px; height: 50px; top: 10%; left: 20%; animation-duration: 12s; }
+    .circle:nth-child(2) { width: 80px; height: 80px; top: 30%; left: 50%; animation-duration: 15s; }
+    .circle:nth-child(3) { width: 60px; height: 60px; top: 50%; left: 10%; animation-duration: 10s; }
+    .circle:nth-child(4) { width: 100px; height: 100px; top: 70%; left: 60%; animation-duration: 18s; }
+    </style>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    """
+    st.markdown(css_style, unsafe_allow_html=True)
+
+# Aplicar fondo molecular
 set_molecular_background()
+
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
 threshold = 0.8
