@@ -202,11 +202,15 @@ def process_all_frames_with_keras(video_path, batch_size=2):
 def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
     # Filtrar frames según las predicciones del modelo VGG16-RF
     valid_frame_numbers = {frame_number for frame_number, pred in frame_results_rf if pred == 1}
-    filtered_keras_results = []
+    filtered_keras_results = [
+        (frame_number, prob) for frame_number, prob in keras_results if frame_number in valid_frame_numbers
+    ]
 
-    for frame_number, prob in keras_results:
-        if frame_number in valid_frame_numbers:
-            # Cargar el frame original del video para comparación
+    # Verificar similitud de los últimos 10 frames con la imagen de referencia
+    if filtered_keras_results:
+        last_10_frames = filtered_keras_results[-10:]
+        filtered_keras_results = []
+        for frame_number, prob in last_10_frames:
             cap = cv2.VideoCapture(video_file.name)
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number - 1)
             ret, frame = cap.read()
