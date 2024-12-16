@@ -253,32 +253,44 @@ def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
     return fig
 
 # --- Interfaz de usuario ---
-video_file = st.file_uploader("Sube un video", type=['mp4', 'avi', 'mov'])
-if video_file:
-    temp_video_path = f"/tmp/{video_file.name}"
-    with open(temp_video_path, 'wb') as f:
-        f.write(video_file.read())
-
-    st.video(temp_video_path, start_time=0)
-
-    if st.button("Procesar Video"):
-        st.write("Eliminando Errores...")
-        frame_results_rf = process_video_vgg_rf_batches(temp_video_path)
+col1, col2 = st.columns(2)
+with col1:
+    st.header("Cargar y Procesar Video")
+    video_file = st.file_uploader("Sube un video", type=['mp4', 'avi', 'mov'])
+    if video_file:
+        temp_video_path = f"/tmp/{video_file.name}"
+        with open(temp_video_path, 'wb') as f:
+            f.write(video_file.read())
     
-        st.write("Procesando Video...")
-        keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
-
-        st.write("Comparando últimos frames con la imagen de referencia...")
-        image_path = "apl/apl_Missing.png"
-        similar_frames = compare_last_frames_with_image(temp_video_path, image_path)
-
-        frame_results_rf = [(frame_number, pred) for frame_number, pred in frame_results_rf if frame_number not in similar_frames]
-        keras_results = [(frame_number, prob) for frame_number, prob in keras_results if frame_number not in similar_frames]
-
+        st.video(temp_video_path, start_time=0)
+    
+        if st.button("Procesar Video"):
+            st.write("Eliminando Errores...")
+            frame_results_rf = process_video_vgg_rf_batches(temp_video_path)
+        
+            st.write("Procesando Video...")
+            keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
+            st.write("Comparando últimos frames con la imagen de referencia...")
+            image_path = "apl/apl_Missing.png"
+            similar_frames = compare_last_frames_with_image(temp_video_path, image_path)
+    
+            frame_results_rf = [(frame_number, pred) for frame_number, pred in frame_results_rf if frame_number not in similar_frames]
+            keras_results = [(frame_number, prob) for frame_number, prob in keras_results if frame_number not in similar_frames]
+            results = (frame_results_rf, keras_results)
+        else:
+            results = None
+    else:
+        results = None
+with col2:
+    st.header("Gráfico de Resultados")
+    if results:
+        frame_results_rf, keras_results = results
         st.write("Generando gráfico...")
         fig = generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=threshold)
         if fig:
             st.plotly_chart(fig)
+    else:
+        st.info("Cargue un video y presione 'Procesar Video' para ver el gráfico.")
 
 
     del video_file, temp_video_path
