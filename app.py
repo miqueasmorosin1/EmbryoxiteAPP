@@ -32,34 +32,35 @@ particles_code = """
 <html>
 <head>
     <style>
-        /* ---- Reset básico ---- */
+        /* Asegura que el contenedor cubra toda la aplicación */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Evita barras de desplazamiento */
-        }
-        .stApp {
-            position: relative;
-            z-index: 0; /* Permite que el fondo quede detrás */
+            overflow: hidden; /* Evita scrollbars */
         }
         #particles-js {
-            position: fixed; /* Fijo para cubrir toda la pantalla */
+            position: fixed; /* Fijo detrás de todo el contenido */
             width: 100%;
             height: 100%;
             top: 0;
             left: 0;
-            z-index: -1; /* Fondo detrás del contenido */
+            z-index: -1; /* Se coloca detrás del contenido */
             background-color: white; /* Fondo blanco */
+        }
+        .stApp {
+            position: relative;
+            z-index: 0; /* El contenido de Streamlit encima */
+            background: transparent;
         }
     </style>
 </head>
 <body>
-    <!-- Contenedor para Particles.js -->
+    <!-- Contenedor de partículas -->
     <div id="particles-js"></div>
 
-    <!-- Script de configuración para Particles.js -->
+    <!-- Script para Particles.js -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
         particlesJS("particles-js", {
@@ -92,7 +93,7 @@ particles_code = """
                 "line_linked": {
                     "enable": true,
                     "distance": 150,
-                    "color": "#000000", /* Líneas en negro */
+                    "color": "#000000", /* Líneas negras */
                     "opacity": 0.4,
                     "width": 1
                 },
@@ -129,7 +130,7 @@ particles_code = """
 </html>
 """
 
-# Renderizar el HTML en Streamlit
+# Renderizar el fondo con Particles.js
 html(particles_code, height=0)
 
 # --- Contenido de la aplicación ---
