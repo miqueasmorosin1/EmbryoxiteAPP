@@ -26,26 +26,83 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-def set_background():
-    background_style = """
+def set_molecular_background():
+    molecular_style = """
     <style>
-    .stApp {
-        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
-        background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite;
+    body {
+        margin: 0;
+        overflow: hidden;
     }
 
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    .stApp {
+        position: relative;
+        background-color: #0f0f0f; /* Fondo oscuro */
+    }
+
+    #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
     }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <div id="particles-js"></div>
+    <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {
+          "value": 100,
+          "density": { "enable": true, "value_area": 800 }
+        },
+        "color": { "value": "#00d4ff" }, /* Color de las moléculas */
+        "shape": {
+          "type": "circle",
+          "stroke": { "width": 0, "color": "#000000" },
+          "polygon": { "nb_sides": 5 }
+        },
+        "opacity": { "value": 0.5, "random": true },
+        "size": { "value": 4, "random": true },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#00d4ff",
+          "opacity": 0.4,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 3,
+          "direction": "none",
+          "random": false,
+          "straight": false,
+          "out_mode": "out",
+          "attract": { "enable": true, "rotateX": 600, "rotateY": 1200 }
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": { "enable": true, "mode": "repulse" },
+          "onclick": { "enable": true, "mode": "push" },
+          "resize": true
+        },
+        "modes": {
+          "grab": { "distance": 400, "line_linked": { "opacity": 1 } },
+          "bubble": { "distance": 400, "size": 10, "duration": 2, "opacity": 0.8 },
+          "repulse": { "distance": 150, "duration": 0.4 },
+          "push": { "particles_nb": 4 },
+          "remove": { "particles_nb": 2 }
+        }
+      },
+      "retina_detect": true
+    });
+    </script>
     """
-    st.markdown(background_style, unsafe_allow_html=True)
+    st.markdown(molecular_style, unsafe_allow_html=True)
 
-# Llamar a la función para configurar el fondo
-set_background()
+# Aplicar fondo molecular
+set_molecular_background()
 
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
