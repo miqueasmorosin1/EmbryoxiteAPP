@@ -14,13 +14,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import os
 import io
-import gc
-import tempfile
 from google.oauth2 import service_account
-import logging
-
-# Configuración de logging
-logging.basicConfig(level=logging.INFO)
 
 # --- Configuración de Streamlit ---
 st.set_page_config(
@@ -29,6 +23,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+#hola
 st.title("Embryo Transfer Prioritization with AI")
 st.sidebar.markdown("### Configuración del Modelo")
 threshold = st.sidebar.slider("Umbral de Transferibilidad", 0.5, 1.0, 0.8)
@@ -48,11 +43,10 @@ def get_drive_service():
         "auth_provider_x509_cert_url": os.getenv('auth_provider_x509_cert_url'),
         "client_x509_cert_url": os.getenv('client_x509_cert_url'),
     }
-    creds = service_account.Credentials.from_service_account_info(
-        creds_info, scopes=['https://www.googleapis.com/auth/drive'])
+    creds = service_account.Credentials.from_service_account_info(creds_info, scopes=['https://www.googleapis.com/auth/drive'])
     return build('drive', 'v3', credentials=creds)
 
-rive_service = get_drive_service()
+drive_service = get_drive_service()
 
 def download_from_drive(file_id, destination_path):
     request = drive_service.files().get_media(fileId=file_id)
@@ -94,8 +88,9 @@ def preprocess_frame(frame):
     frame_preprocessed = preprocess_input(frame_resized)
     return frame_preprocessed
 
-# --- Procesamiento del video ---
-def process_video_vgg_rf_batches(video_path, batch_size=16):
+# --- Procesamiento del video con VGG16-RF en batches paralelos ---
+# --- Procesamiento del video con VGG16-RF en batches paralelos ---
+def process_video_vgg_rf_batches(video_path, batch_size=32):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_results = []
@@ -114,45 +109,36 @@ def process_video_vgg_rf_batches(video_path, batch_size=16):
         frame_numbers_batch.append(frame_number)
 
         if len(frames_batch) == batch_size:
-            try:
-                features = vgg_model.predict(np.array(frames_batch), batch_size=batch_size)
-                rf_predictions = rf_model.predict(features)
-
-                # Guardar solo frames etiquetados como "Embrion" (1)
-                frame_results.extend([
-                    (frame_numbers_batch[i], rf_predictions[i])
-                    for i in range(len(rf_predictions)) if rf_predictions[i] == 1
-                ])
-                del features  # Liberar memoria
-                gc.collect()  # Limpiar memoria
-
-                processed_frames += len(frames_batch)
-                progress_bar.progress(min(processed_frames / total_frames, 1.0))
-
-            except Exception as e:
-                logging.error(f"Error procesando lote: {e}")
-            
-            # Resetear los batches
-            frames_batch = []
-            frame_numbers_batch = []
-
-    # Procesar frames restantes
-    if frames_batch:
-        try:
-            features = vgg_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
+            features = vgg_model.predict(np.array(frames_batch), batch_size=batch_size)
             rf_predictions = rf_model.predict(features)
+
+            # Filtro estricto: Guardar solo frames etiquetados como "Embrion" (1)
             frame_results.extend([
                 (frame_numbers_batch[i], rf_predictions[i])
                 for i in range(len(rf_predictions)) if rf_predictions[i] == 1
             ])
-        except Exception as e:
-            logging.error(f"Error procesando frames restantes: {e}")
+
+            processed_frames += len(frames_batch)
+            progress_bar.progress(processed_frames / total_frames)
+
+            # Resetear los batches
+            frames_batch = []
+            frame_numbers_batch = []
+
+    if frames_batch:
+        features = vgg_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
+        rf_predictions = rf_model.predict(features)
+        frame_results.extend([
+            (frame_numbers_batch[i], rf_predictions[i])
+            for i in range(len(rf_predictions)) if rf_predictions[i] == 1
+        ])
 
     cap.release()
     progress_bar.empty()
     return frame_results
 
-def process_all_frames_with_keras(video_path, batch_size=8):
+# --- Predicción con el modelo Keras frame por frame ---
+def process_all_frames_with_keras(video_path, batch_size=2):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     keras_results = []
@@ -172,35 +158,33 @@ def process_all_frames_with_keras(video_path, batch_size=8):
         frame_numbers_batch.append(frame_number)
 
         if len(frames_batch) == batch_size:
-            try:
-                predictions = transfer_model.predict(np.array(frames_batch), batch_size=batch_size)
-                keras_results.extend(zip(frame_numbers_batch, predictions[:, 0]))
+            predictions = transfer_model.predict(np.array(frames_batch), batch_size=batch_size)
+            keras_results.extend(zip(frame_numbers_batch, predictions[:, 0]))
 
-                processed_frames += len(frames_batch)
-                progress_bar.progress(min(processed_frames / total_frames, 1.0))
-            except Exception as e:
-                logging.error(f"Error procesando con Keras: {e}")
+            processed_frames += len(frames_batch)
+            progress_bar.progress(processed_frames / total_frames)
 
             frames_batch = []
             frame_numbers_batch = []
 
+    # Procesar frames restantes
     if frames_batch:
-        try:
-            predictions = transfer_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
-            keras_results.extend(zip(frame_numbers_batch, predictions[:, 0]))
-        except Exception as e:
-            logging.error(f"Error procesando frames restantes con Keras: {e}")
+        predictions = transfer_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
+        keras_results.extend(zip(frame_numbers_batch, predictions[:, 0]))
 
     cap.release()
     progress_bar.empty()
     return keras_results
 
+# --- Generación del gráfico ---
 def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
+    # Filtrar frames según las predicciones del modelo VGG16-RF
     valid_frame_numbers = {frame_number for frame_number, pred in frame_results_rf if pred == 1}
     filtered_keras_results = [
         (frame_number, prob) for frame_number, prob in keras_results if frame_number in valid_frame_numbers
     ]
 
+    # Generar el gráfico
     if not filtered_keras_results:
         st.warning("No hay frames transferibles según los modelos.")
         return None
@@ -225,27 +209,28 @@ def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
         xaxis_title='Frame',
         yaxis_title='Probabilidad de Transferibilidad',
         title='Predicciones por Frame - Modelo Keras',
-        yaxis=dict(range=[0, 1])
+        yaxis=dict(range=[0, 1])  # Rango de probabilidades entre 0 y 1
     )
     return fig
-
+    
 # --- Interfaz de usuario ---
 video_file = st.file_uploader("Sube un video", type=['mp4', 'avi', 'mov'])
 if video_file:
-    with tempfile.NamedTemporaryFile(delete=False) as temp_video_file:
-        temp_video_file.write(video_file.read())
-        temp_video_path = temp_video_file.name
+    temp_video_path = f"/tmp/{video_file.name}"
+    with open(temp_video_path, 'wb') as f:
+        f.write(video_file.read())
 
     st.video(temp_video_path)
 
     if st.button("Procesar Video"):
-        st.write("Procesando con modelo VGG16-RF...")
+        st.write("Eliminando Errores...")
         frame_results_rf = process_video_vgg_rf_batches(temp_video_path)
-
-        st.write("Procesando con modelo Keras...")
-        keras_results = process_all_frames_with_keras(temp_video_path, batch_size=8)
-
+    
+        st.write("Procesando Video...")
+        keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
+    
         st.write("Generando gráfico...")
         fig = generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=threshold)
         if fig:
             st.plotly_chart(fig)
+
