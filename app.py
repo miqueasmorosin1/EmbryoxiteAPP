@@ -15,8 +15,6 @@ import streamlit as st
 import os
 import io
 from google.oauth2 import service_account
-import gc
-from skimage.metrics import structural_similarity as ssim
 
 # --- Configuración de Streamlit ---
 st.set_page_config(
@@ -25,7 +23,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-#hola
+
 st.title("Embryo Transfer Prioritization with AI")
 st.sidebar.markdown("### Configuración del Modelo")
 threshold = st.sidebar.slider("Umbral de Transferibilidad", 0.5, 1.0, 0.8)
@@ -90,26 +88,46 @@ def preprocess_frame(frame):
     frame_preprocessed = preprocess_input(frame_resized)
     return frame_preprocessed
 
-@st.cache_resource
-def load_reference_image():
-    ref_image_path = "apl/apl_Missing.png"
-    ref_image = cv2.imread(ref_image_path)
-    ref_image = cv2.cvtColor(ref_image, cv2.COLOR_BGR2GRAY)  # Convertir a escala de grises
-    ref_image_resized = cv2.resize(ref_image, (224, 224))  # Ajustar al tamaño esperado
-    return ref_image_resized
-
-reference_image = load_reference_image()
-# --- Comparar frames con la imagen de referencia ---
-def is_similar_to_reference(frame, reference, threshold=0.8):
+# --- Comparar últimos 10 frames con una imagen ---
+def compare_last_frames_with_image(video_path, image_path, similarity_threshold=0.9):
     """
-    Compara un frame con la imagen de referencia usando SSIM.
-    Devuelve True si la similitud es mayor al umbral, False en caso contrario.
+    Compara los últimos 10 frames de un video con una imagen.
+    Elimina frames similares a la imagen basada en un umbral de similitud.
     """
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convertir a escala de grises
-    frame_resized = cv2.resize(frame_gray, (224, 224))  # Ajustar al tamaño esperado
+    # Leer la imagen de referencia
+    reference_image = cv2.imread(image_path)
+    if reference_image is None:
+        st.error(f"No se pudo cargar la imagen de referencia desde {image_path}")
+        return set()
 
-    similarity, _ = ssim(frame_resized, reference, full=True)
-    return similarity > threshold
+    reference_image = cv2.resize(reference_image, (224, 224))
+    reference_hist = cv2.calcHist([reference_image], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256])
+    reference_hist = cv2.normalize(reference_hist, reference_hist).flatten()
+
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    last_frames = max(0, total_frames - 10)
+
+    similar_frames = set()
+
+    cap.set(cv2.CAP_PROP_POS_FRAMES, last_frames)  # Ir a los últimos 10 frames
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+        frame_resized = cv2.resize(frame, (224, 224))
+        frame_hist = cv2.calcHist([frame_resized], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256])
+        frame_hist = cv2.normalize(frame_hist, frame_hist).flatten()
+
+        # Comparar similitud entre histogramas
+        similarity = cv2.compareHist(reference_hist, frame_hist, cv2.HISTCMP_CORREL)
+        if similarity >= similarity_threshold:
+            similar_frames.add(frame_number)
+
+    cap.release()
+    return similar_frames
 
 # --- Procesamiento del video con VGG16-RF en batches paralelos ---
 def process_video_vgg_rf_batches(video_path, batch_size=32):
@@ -134,7 +152,6 @@ def process_video_vgg_rf_batches(video_path, batch_size=32):
             features = vgg_model.predict(np.array(frames_batch), batch_size=batch_size)
             rf_predictions = rf_model.predict(features)
 
-            # Filtro estricto: Guardar solo frames etiquetados como "Embrion" (1)
             frame_results.extend([
                 (frame_numbers_batch[i], rf_predictions[i])
                 for i in range(len(rf_predictions)) if rf_predictions[i] == 1
@@ -143,7 +160,6 @@ def process_video_vgg_rf_batches(video_path, batch_size=32):
             processed_frames += len(frames_batch)
             progress_bar.progress(processed_frames / total_frames)
 
-            # Resetear los batches
             frames_batch = []
             frame_numbers_batch = []
 
@@ -189,7 +205,6 @@ def process_all_frames_with_keras(video_path, batch_size=2):
             frames_batch = []
             frame_numbers_batch = []
 
-    # Procesar frames restantes
     if frames_batch:
         predictions = transfer_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
         keras_results.extend(zip(frame_numbers_batch, predictions[:, 0]))
@@ -200,30 +215,13 @@ def process_all_frames_with_keras(video_path, batch_size=2):
 
 # --- Generación del gráfico ---
 def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
-    # Filtrar frames según las predicciones del modelo VGG16-RF
     valid_frame_numbers = {frame_number for frame_number, pred in frame_results_rf if pred == 1}
     filtered_keras_results = [
         (frame_number, prob) for frame_number, prob in keras_results if frame_number in valid_frame_numbers
     ]
 
-    # Verificar similitud de los últimos 10 frames con la imagen de referencia
-    if filtered_keras_results:
-        last_10_frames = filtered_keras_results[-10:]
-        filtered_keras_results = []
-        for frame_number, prob in last_10_frames:
-            cap = cv2.VideoCapture(video_file.name)
-            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number - 1)
-            ret, frame = cap.read()
-            cap.release()
-
-            if not ret or is_similar_to_reference(frame, reference_image):
-                continue  # Omitir si es similar a la referencia
-
-            filtered_keras_results.append((frame_number, prob))
-
-    # Generar el gráfico
     if not filtered_keras_results:
-        st.warning("No hay frames transferibles según los modelos o tras la comparación con la imagen de referencia.")
+        st.warning("No hay frames transferibles según los modelos.")
         return None
 
     frame_numbers = [frame_number for frame_number, _ in filtered_keras_results]
@@ -246,11 +244,10 @@ def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
         xaxis_title='Frame',
         yaxis_title='Probabilidad de Transferibilidad',
         title='Predicciones por Frame - Modelo Keras',
-        yaxis=dict(range=[0, 1])  # Rango de probabilidades entre 0 y 1
+        yaxis=dict(range=[0, 1])
     )
     return fig
 
-    
 # --- Interfaz de usuario ---
 video_file = st.file_uploader("Sube un video", type=['mp4', 'avi', 'mov'])
 if video_file:
@@ -266,11 +263,19 @@ if video_file:
     
         st.write("Procesando Video...")
         keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
-    
+
+        st.write("Comparando últimos frames con la imagen de referencia...")
+        image_path = "apl/apl_Missing.png"
+        similar_frames = compare_last_frames_with_image(temp_video_path, image_path)
+
+        frame_results_rf = [(frame_number, pred) for frame_number, pred in frame_results_rf if frame_number not in similar_frames]
+        keras_results = [(frame_number, prob) for frame_number, prob in keras_results if frame_number not in similar_frames]
+
         st.write("Generando gráfico...")
         fig = generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=threshold)
         if fig:
             st.plotly_chart(fig)
+
 
     del video_file, temp_video_path
     gc.collect()
