@@ -26,8 +26,7 @@ st.set_page_config(
 )
 
 st.title("Embryo Transfer Prioritization with AI")
-st.sidebar.markdown("### Configuración del Modelo")
-threshold = st.sidebar.slider("Umbral de Transferibilidad", 0.5, 1.0, 0.8)
+threshold = 0.8
 
 # --- Configuración de Google Drive ---
 @st.cache_resource
@@ -245,7 +244,11 @@ def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
         xaxis_title='Frame',
         yaxis_title='Probabilidad de Transferibilidad',
         title='Predicciones por Frame - Modelo Keras',
-        yaxis=dict(range=[0, 1])
+        yaxis=dict(
+            tickvals=[0, 1],
+            ticktext=['En Desarrollo', 'Transferido'],
+            range=[0, 1]
+        )
     )
     return fig
 
@@ -256,7 +259,7 @@ if video_file:
     with open(temp_video_path, 'wb') as f:
         f.write(video_file.read())
 
-    st.video(temp_video_path)
+    st.video(temp_video_path, start_time=0)
 
     if st.button("Procesar Video"):
         st.write("Eliminando Errores...")
