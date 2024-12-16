@@ -25,7 +25,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("Embryo Transfer Prioritization with AI")
+st.title("Embryo Transfer Prioritization")
 threshold = 0.8
 
 # --- Configuración de Google Drive ---
