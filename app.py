@@ -293,5 +293,5 @@ with col2:
         st.info("Cargue un video y presione 'Procesar Video' para ver el gráfico.")
 
 
-    del video_file, temp_video_path
+    del video_file
     gc.collect()
