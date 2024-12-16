@@ -255,7 +255,6 @@ def generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=0.8):
 # --- Interfaz de usuario ---
 col1, col2 = st.columns(2)
 with col1:
-    st.header("Cargar y Procesar Video")
     video_file = st.file_uploader("Sube un video", type=['mp4', 'avi', 'mov'])
     if video_file:
         temp_video_path = f"/tmp/{video_file.name}"
