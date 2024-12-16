@@ -29,58 +29,68 @@ def add_particles():
     <div id="particles-js"></div>
 
     <style>
-        /* Configuración del contenedor */
+        /* Estilos para el contenedor de partículas */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* Garantizar que el body ocupe toda la ventana */
+            width: 100%;  /* Asegurar que el ancho también sea 100% */
+            overflow: hidden; /* Evitar barras de desplazamiento */
+        }
+
         #particles-js {
-            position: fixed; /* Se asegura de que cubra toda la pantalla */
+            position: fixed; /* Contenedor cubre toda la pantalla */
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Detrás del contenido principal */
-            background-color: transparent; /* Fondo transparente */
+            height: 100%; /* Altura completa */
+            width: 100%;  /* Ancho completo */
+            z-index: -1; /* Colocar detrás del contenido */
+            background: transparent; /* Fondo transparente */
         }
     </style>
 
+    <!-- Cargar particles.js desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
     <script>
-        /* Inicialización de partículas */
+        /* Configuración de particles.js */
         particlesJS("particles-js", {
             "particles": {
                 "number": {
                     "value": 100, /* Número de partículas */
                     "density": {
                         "enable": true,
-                        "value_area": 800
+                        "value_area": 800 /* Densidad del área */
                     }
                 },
                 "color": {
-                    "value": "#FFFFFF" /* Color de las partículas: negro */
+                    "value": "#000000" /* Partículas negras */
                 },
                 "shape": {
-                    "type": "circle", /* Forma circular */
+                    "type": "circle", /* Forma de las partículas */
                     "stroke": {
                         "width": 0,
                         "color": "#000000"
                     }
                 },
                 "opacity": {
-                    "value": 0.5, /* Opacidad media */
+                    "value": 0.5,
                     "random": false
                 },
                 "size": {
                     "value": 3,
-                    "random": true /* Tamaños variados */
+                    "random": true
                 },
                 "line_linked": {
-                    "enable": true, /* Líneas entre partículas */
+                    "enable": true, /* Líneas conectando partículas */
                     "distance": 150,
-                    "color": "#FFFFFF", /* Líneas negras */
+                    "color": "#000000", /* Líneas negras */
                     "opacity": 0.4,
                     "width": 1
                 },
                 "move": {
-                    "enable": true, /* Movimiento activado */
-                    "speed": 6, /* Velocidad del movimiento */
+                    "enable": true, /* Movimiento habilitado */
+                    "speed": 6, /* Velocidad de movimiento */
                     "direction": "none",
                     "random": false,
                     "straight": false,
@@ -97,17 +107,17 @@ def add_particles():
                     },
                     "onclick": {
                         "enable": true,
-                        "mode": "push" /* Agregar partículas al hacer clic */
+                        "mode": "push" /* Añadir partículas al hacer clic */
                     },
                     "resize": true
                 }
             },
-            "retina_detect": true /* Optimización para pantallas retina */
+            "retina_detect": true /* Soporte Retina */
         });
     </script>
     """
     # Renderizar el HTML en Streamlit
-    st.components.v1.html(particles_html, height=600, width=0)
+    st.components.v1.html(particles_html, height=0, width=0)
 st.title("Embryo Transfer Prioritization")
 add_particles()
 threshold = 0.8
