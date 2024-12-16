@@ -208,7 +208,7 @@ if video_file:
     st.video(temp_video_path)
 
     if st.button("Procesar Video"):
-        frame_results_rf = process_video_vgg_rf(temp_video_path)
+        frame_results_rf = process_video_vgg_rf_parallel(temp_video_path)
         keras_results = process_video_keras(temp_video_path)
         fig = generate_plot(frame_results_rf, keras_results, threshold)
         if fig:
