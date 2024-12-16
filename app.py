@@ -17,7 +17,7 @@ import io
 from google.oauth2 import service_account
 import gc
 from keras import backend as K
-from streamlit.components.v1 import html
+from streamlit_particles import particles
 
 st.set_page_config(
     page_title="Embryo Analysis",
@@ -27,41 +27,61 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-css_code = """
-<style>
-/* Fondo animado */
-body {
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
-}
-
-/* Animación del gradiente */
-@keyframes gradient {
-    0% {
-        background-position: 0% 50%;
+particles(
+    config={
+        "particles": {
+            "number": {"value": 80, "density": {"enable": True, "value_area": 800}},
+            "color": {"value": "#ffffff"},
+            "shape": {
+                "type": "circle",
+                "stroke": {"width": 0, "color": "#000000"},
+                "polygon": {"nb_sides": 5},
+                "image": {"src": "img/github.svg", "width": 100, "height": 100},
+            },
+            "opacity": {"value": 0.5, "random": False},
+            "size": {"value": 3, "random": True},
+            "line_linked": {
+                "enable": True,
+                "distance": 150,
+                "color": "#ffffff",
+                "opacity": 0.4,
+                "width": 1,
+            },
+            "move": {
+                "enable": True,
+                "speed": 6,
+                "direction": "none",
+                "random": False,
+                "straight": False,
+                "out_mode": "out",
+                "bounce": False,
+            },
+        },
+        "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+                "onhover": {"enable": True, "mode": "repulse"},
+                "onclick": {"enable": True, "mode": "push"},
+                "resize": True,
+            },
+            "modes": {
+                "grab": {"distance": 400, "line_linked": {"opacity": 1}},
+                "bubble": {
+                    "distance": 400,
+                    "size": 40,
+                    "duration": 2,
+                    "opacity": 8,
+                    "speed": 3,
+                },
+                "repulse": {"distance": 200, "duration": 0.4},
+                "push": {"particles_nb": 4},
+                "remove": {"particles_nb": 2},
+            },
+        },
+        "retina_detect": True,
     }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
+)
 
-/* Ajustes del contenido de Streamlit */
-.stApp {
-    background: transparent !important;
-    position: relative;
-    z-index: 1;
-}
-</style>
-"""
-
-# Inyectar CSS directamente en Streamlit
-st.markdown(css_code, unsafe_allow_html=True)
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
 threshold = 0.8
