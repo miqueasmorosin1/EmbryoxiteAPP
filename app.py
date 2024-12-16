@@ -267,7 +267,7 @@ if video_file:
 
     if st.button("Procesar Video"):
         st.write("Eliminando Errores...")
-        frame_results_rf = process_video_vgg_rf_batches(temp_video_path)
+        frame_results_rf = process_video_vgg_rf_parallel(temp_video_path, vgg_model, rf_model)
     
         st.write("Procesando Video...")
         keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
