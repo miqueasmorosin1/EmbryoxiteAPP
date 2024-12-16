@@ -131,7 +131,7 @@ def compare_last_frames_with_image(video_path, image_path, similarity_threshold=
     return similar_frames
 
 # --- Procesamiento del video con VGG16-RF en batches paralelos ---
-def process_video_vgg_rf_batches(video_path, batch_size=32):
+def process_video_vgg_rf_batches(video_path, batch_size=64):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_results = []
