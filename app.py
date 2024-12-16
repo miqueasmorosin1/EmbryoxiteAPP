@@ -27,59 +27,37 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-particles(
-    config={
-        "particles": {
-            "number": {"value": 80, "density": {"enable": True, "value_area": 800}},
-            "color": {"value": "#ffffff"},
-            "shape": {
-                "type": "circle",
-                "stroke": {"width": 0, "color": "#000000"},
-                "polygon": {"nb_sides": 5},
-                "image": {"src": "img/github.svg", "width": 100, "height": 100},
-            },
-            "opacity": {"value": 0.5, "random": False},
-            "size": {"value": 3, "random": True},
-            "line_linked": {
-                "enable": True,
-                "distance": 150,
-                "color": "#ffffff",
-                "opacity": 0.4,
-                "width": 1,
-            },
-            "move": {
-                "enable": True,
-                "speed": 6,
-                "direction": "none",
-                "random": False,
-                "straight": False,
-                "out_mode": "out",
-                "bounce": False,
-            },
-        },
-        "interactivity": {
-            "detect_on": "canvas",
-            "events": {
-                "onhover": {"enable": True, "mode": "repulse"},
-                "onclick": {"enable": True, "mode": "push"},
-                "resize": True,
-            },
-            "modes": {
-                "grab": {"distance": 400, "line_linked": {"opacity": 1}},
-                "bubble": {
-                    "distance": 400,
-                    "size": 40,
-                    "duration": 2,
-                    "opacity": 8,
-                    "speed": 3,
-                },
-                "repulse": {"distance": 200, "duration": 0.4},
-                "push": {"particles_nb": 4},
-                "remove": {"particles_nb": 2},
-            },
-        },
-        "retina_detect": True,
-    }
+particle_data = [
+    {"position": [0, 0], "size": 500},
+    {"position": [1, 1], "size": 300},
+    {"position": [2, 2], "size": 400},
+]
+
+# Configuración del fondo dinámico
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=particle_data,
+    get_position="position",
+    get_radius="size",
+    get_fill_color=[255, 0, 0, 150],  # Color RGBA para las partículas
+    pickable=False,
+)
+
+# Configuración del viewport
+view_state = pdk.ViewState(
+    latitude=0,
+    longitude=0,
+    zoom=1,
+    pitch=50,
+)
+
+# Renderizar el fondo como mapa interactivo
+st.pydeck_chart(
+    pdk.Deck(
+        layers=[layer],
+        initial_view_state=view_state,
+        map_style=None,  # Sin mapa base, solo partículas
+    )
 )
 
 # --- Contenido de la aplicación ---
