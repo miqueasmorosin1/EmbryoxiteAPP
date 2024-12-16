@@ -137,7 +137,7 @@ def process_batch(frames_batch, vgg_model, rf_model):
     results = [(i, pred) for i, pred in enumerate(rf_predictions) if pred == 1]
     return results
 
-def def process_video_vgg_rf_batches(video_path, vgg_model, rf_model, batch_size=32):
+def process_video_vgg_rf_batches(video_path, vgg_model, rf_model, batch_size=32):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_results = []
