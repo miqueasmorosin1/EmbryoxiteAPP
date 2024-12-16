@@ -27,94 +27,118 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-particles_code = """
-<div id="particles-js"></div>
+css_animation_code = """
+<div class="background">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+</div>
 <style>
-    /* Fondo de partículas */
-    #particles-js {
+    /* Fondo animado */
+    .background {
         position: fixed;
         width: 100%;
         height: 100%;
         top: 0;
         left: 0;
-        z-index: -1; /* Asegura que esté detrás del contenido */
+        z-index: -1; /* Coloca el fondo detrás del contenido */
+        background: linear-gradient(to bottom, #ffffff, #e6f7ff);
+        overflow: hidden;
     }
-    /* Configuración de Streamlit */
-    .stApp {
-        background: rgba(0, 0, 0, 0); /* Fondo transparente */
-        position: relative;
-        z-index: 1; /* Contenido encima del fondo */
+
+    /* Estilo de las burbujas */
+    .bubble {
+        position: absolute;
+        bottom: -100px;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(0, 150, 255, 0.2);
+        border-radius: 50%;
+        animation: rise 10s infinite ease-in-out;
+    }
+
+    /* Animación de las burbujas */
+    @keyframes rise {
+        0% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-110vh) scale(0.5);
+            opacity: 0;
+        }
+    }
+
+    /* Genera burbujas de tamaños y posiciones aleatorias */
+    .bubble:nth-child(1) {
+        left: 10%;
+        width: 80px;
+        height: 80px;
+        animation-duration: 12s;
+    }
+    .bubble:nth-child(2) {
+        left: 20%;
+        animation-duration: 15s;
+        animation-delay: 3s;
+    }
+    .bubble:nth-child(3) {
+        left: 30%;
+        animation-duration: 10s;
+        animation-delay: 6s;
+    }
+    .bubble:nth-child(4) {
+        left: 40%;
+        width: 60px;
+        height: 60px;
+        animation-duration: 8s;
+        animation-delay: 2s;
+    }
+    .bubble:nth-child(5) {
+        left: 50%;
+        animation-duration: 14s;
+        animation-delay: 4s;
+    }
+    .bubble:nth-child(6) {
+        left: 60%;
+        width: 100px;
+        height: 100px;
+        animation-duration: 20s;
+        animation-delay: 8s;
+    }
+    .bubble:nth-child(7) {
+        left: 70%;
+        animation-duration: 18s;
+        animation-delay: 1s;
+    }
+    .bubble:nth-child(8) {
+        left: 80%;
+        animation-duration: 12s;
+        animation-delay: 5s;
+    }
+    .bubble:nth-child(9) {
+        left: 90%;
+        width: 120px;
+        height: 120px;
+        animation-duration: 16s;
+        animation-delay: 7s;
+    }
+    .bubble:nth-child(10) {
+        left: 95%;
+        animation-duration: 14s;
+        animation-delay: 6s;
     }
 </style>
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<script>
-    particlesJS("particles-js", {
-        "particles": {
-            "number": {
-                "value": 80,
-                "density": {
-                    "enable": true,
-                    "value_area": 800
-                }
-            },
-            "color": {
-                "value": "#000000" /* Partículas en negro */
-            },
-            "shape": {
-                "type": "circle",
-                "stroke": {
-                    "width": 0,
-                    "color": "#000000"
-                }
-            },
-            "opacity": {
-                "value": 0.5,
-                "random": false
-            },
-            "size": {
-                "value": 3,
-                "random": true
-            },
-            "line_linked": {
-                "enable": true,
-                "distance": 150,
-                "color": "#000000", /* Líneas en negro */
-                "opacity": 0.4,
-                "width": 1
-            },
-            "move": {
-                "enable": true,
-                "speed": 6,
-                "direction": "none",
-                "random": false
-            }
-        },
-        "interactivity": {
-            "detect_on": "canvas",
-            "events": {
-                "onhover": {
-                    "enable": true,
-                    "mode": "repulse"
-                },
-                "onclick": {
-                    "enable": true,
-                    "mode": "push"
-                }
-            },
-            "modes": {
-                "repulse": {
-                    "distance": 100,
-                    "duration": 0.4
-                }
-            }
-        },
-        "retina_detect": true
-    });
-</script>
 """
 
-# Renderizar el HTML en Streamlit
-html(particles_code, height=0)
+# Renderizar el fondo animado en Streamlit
+html(css_animation_code, height=0)
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
 threshold = 0.8
