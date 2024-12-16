@@ -265,12 +265,12 @@ with col1:
         st.video(temp_video_path, start_time=0)
     
         if st.button("Procesar Video"):
-            st.write("Eliminando Errores...")
+            progress_message = st.empty()
+            progress_message.write("Eliminando Errores...")
             frame_results_rf = process_video_vgg_rf_batches(temp_video_path)
         
-            st.write("Procesando Video...")
+            progress_message.write("Procesando Video...")
             keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
-            st.write("Comparando últimos frames con la imagen de referencia...")
             image_path = "apl/apl_Missing.png"
             similar_frames = compare_last_frames_with_image(temp_video_path, image_path)
     
@@ -282,10 +282,10 @@ with col1:
     else:
         results = None
 with col2:
-    st.header("Gráfico de Resultados")
     if results:
+        progress_message = st.empty()
         frame_results_rf, keras_results = results
-        st.write("Generando gráfico...")
+        progress_message.write("Generando gráfico...")
         fig = generate_plot_vgg_keras(frame_results_rf, keras_results, threshold=threshold)
         if fig:
             st.plotly_chart(fig)
