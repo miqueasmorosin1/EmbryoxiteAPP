@@ -27,43 +27,108 @@ st.set_page_config(
 )
 
 # --- Fondo dinámico usando HTML y CSS ---
-background_animation = """
+particles_code = """
 <!DOCTYPE html>
 <html>
 <head>
     <style>
+        /* ---- Reset básico ---- */
         body {
             margin: 0;
-            height: 100vh;
-            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            font: normal 75% Arial, Helvetica, sans-serif;
+            background: white; /* Fondo blanco */
+            color: black; /* Texto en negro */
         }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+        canvas {
+            display: block;
+            vertical-align: bottom;
         }
-
-        .stApp {
-            background: transparent; /* Hacer transparente el contenedor principal de Streamlit */
+        /* ---- Contenedor de Particles.js ---- */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Fondo detrás del contenido */
+            background-color: white; /* Fondo blanco */
         }
     </style>
 </head>
 <body>
+    <!-- Contenedor para Particles.js -->
+    <div id="particles-js"></div>
+
+    <!-- Script de configuración para Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#000000" /* Partículas en negro */
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false
+                },
+                "size": {
+                    "value": 3,
+                    "random": true
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#000000", /* Líneas en negro */
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 6,
+                    "direction": "none",
+                    "random": false
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    }
+                },
+                "modes": {
+                    "repulse": {
+                        "distance": 100,
+                        "duration": 0.4
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+    </script>
 </body>
 </html>
 """
 
-# Renderizar el fondo animado
-html(background_animation, height=0)
+# Renderizar el HTML en Streamlit
+html(particles_code, height=600)
 
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
