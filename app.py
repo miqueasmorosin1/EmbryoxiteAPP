@@ -50,7 +50,7 @@ def add_particles():
             position: absolute;
             width: 100%;
             height: 100%;
-            background-color: #b61924;
+            background-color: #ffffff; /* Fondo blanco */
             background-image: url("");
             background-repeat: no-repeat;
             background-size: cover;
@@ -103,7 +103,7 @@ def add_particles():
                     }
                 },
                 "color": {
-                    "value": "#ffffff"
+                    "value": "#000000" /* Partículas negras */
                 },
                 "shape": {
                     "type": "circle",
@@ -143,7 +143,7 @@ def add_particles():
                 "line_linked": {
                     "enable": true,
                     "distance": 150,
-                    "color": "#ffffff",
+                    "color": "#000000", /* Líneas negras */
                     "opacity": 0.4,
                     "width": 1
                 },
