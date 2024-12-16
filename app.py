@@ -26,40 +26,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- Fondo dinámico usando HTML y CSS ---
-particle_data = [
-    {"position": [0, 0], "size": 500},
-    {"position": [1, 1], "size": 300},
-    {"position": [2, 2], "size": 400},
-]
-
-# Configuración del fondo dinámico
-layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=particle_data,
-    get_position="position",
-    get_radius="size",
-    get_fill_color=[255, 0, 0, 150],  # Color RGBA para las partículas
-    pickable=False,
-)
-
-# Configuración del viewport
-view_state = pdk.ViewState(
-    latitude=0,
-    longitude=0,
-    zoom=1,
-    pitch=50,
-)
-
-# Renderizar el fondo como mapa interactivo
-st.pydeck_chart(
-    pdk.Deck(
-        layers=[layer],
-        initial_view_state=view_state,
-        map_style=None,  # Sin mapa base, solo partículas
-    )
-)
-
 # --- Contenido de la aplicación ---
 st.title("Embryo Transfer Prioritization")
 threshold = 0.8
