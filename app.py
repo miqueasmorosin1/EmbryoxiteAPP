@@ -27,7 +27,7 @@ st.set_page_config(
 
 # --- Fondo dinámico usando HTML y CSS ---
 def set_image_background():
-    image_url = "https://raw.githubusercontent.com/apl/image2.png"  # URL directa a tu imagen
+    image_url = "https://raw.githubusercontent.com/miqueasmorosin1/EmbryoxiteAPP/main/apl/image2.png"  # URL directa a tu imagen
 
     css = f"""
     <style>
