@@ -27,7 +27,7 @@ st.set_page_config(
 
 # --- Fondo dinámico usando HTML y CSS ---
 def set_image_background():
-    image_url = "apl/Diseño sin título (5) (1).png"  # URL directa a tu imagen
+    image_url = "apl/image2.png"  # URL directa a tu imagen
 
     css = f"""
     <style>
