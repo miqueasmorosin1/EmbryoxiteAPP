@@ -131,58 +131,51 @@ def compare_last_frames_with_image(video_path, image_path, similarity_threshold=
     return similar_frames
 
 # --- Procesamiento del video con VGG16-RF en batches paralelos ---
-def process_batch(frames_batch, vgg_model, rf_model):
-    features = vgg_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
-    rf_predictions = rf_model.predict(features)
-    results = [(i, pred) for i, pred in enumerate(rf_predictions) if pred == 1]
-    return results
-
-def process_video_vgg_rf_batches(video_path, vgg_model, rf_model, batch_size=32):
+def process_video_vgg_rf_batches(video_path, batch_size=32):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_results = []
     frames_batch = []
     frame_numbers_batch = []
-
-    st.write("Procesando video en paralelo...")
     progress_bar = st.progress(0)
     processed_frames = 0
 
-    with ThreadPoolExecutor() as executor:
-        futures = []
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
+        frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+        frames_batch.append(preprocess_frame(frame))
+        frame_numbers_batch.append(frame_number)
 
-            frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-            frames_batch.append(preprocess_frame(frame))
-            frame_numbers_batch.append(frame_number)
+        if len(frames_batch) == batch_size:
+            features = vgg_model.predict(np.array(frames_batch), batch_size=batch_size)
+            rf_predictions = rf_model.predict(features)
 
-            if len(frames_batch) == batch_size:
-                # Enviar el batch a un thread
-                futures.append(executor.submit(process_batch, frames_batch, vgg_model, rf_model))
+            frame_results.extend([
+                (frame_numbers_batch[i], rf_predictions[i])
+                for i in range(len(rf_predictions)) if rf_predictions[i] == 1
+            ])
 
-                # Resetear el batch
-                frames_batch = []
-                frame_numbers_batch = []
-
-            processed_frames += 1
+            processed_frames += len(frames_batch)
             progress_bar.progress(processed_frames / total_frames)
 
-        # Procesar frames restantes
-        if frames_batch:
-            futures.append(executor.submit(process_batch, frames_batch, vgg_model, rf_model))
+            frames_batch = []
+            frame_numbers_batch = []
 
-        # Recoger resultados
-        for future in futures:
-            frame_results.extend(future.result())
+    if frames_batch:
+        features = vgg_model.predict(np.array(frames_batch), batch_size=len(frames_batch))
+        rf_predictions = rf_model.predict(features)
+        frame_results.extend([
+            (frame_numbers_batch[i], rf_predictions[i])
+            for i in range(len(rf_predictions)) if rf_predictions[i] == 1
+        ])
 
     cap.release()
     progress_bar.empty()
-    gc.collect()  # Liberar memoria
     return frame_results
+
 # --- Predicción con el modelo Keras frame por frame ---
 def process_all_frames_with_keras(video_path, batch_size=2):
     cap = cv2.VideoCapture(video_path)
@@ -267,7 +260,7 @@ if video_file:
 
     if st.button("Procesar Video"):
         st.write("Eliminando Errores...")
-        frame_results_rf = process_video_vgg_rf_batches(temp_video_path, vgg_model, rf_model)
+        frame_results_rf = process_video_vgg_rf_batches(temp_video_path)
     
         st.write("Procesando Video...")
         keras_results = process_all_frames_with_keras(temp_video_path, batch_size=2)
