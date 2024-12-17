@@ -57,7 +57,7 @@ def add_particles(y,x):
         particlesJS("particles-js", {
             "particles": {
                 "number": {
-                    "value": 200, /* Número de partículas */
+                    "value": 150, /* Número de partículas */
                     "density": {
                         "enable": true,
                         "value_area": 800 /* Densidad del área */
