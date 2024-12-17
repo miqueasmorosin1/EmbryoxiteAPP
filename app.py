@@ -402,6 +402,6 @@ with col2:
             st.plotly_chart(fig)
     else:
         st.info("Cargue un video y presione 'Procesar Video' para ver el gráfico.")
-    add_particles(950,1000)
+    add_particles(970,1000)
 
 add_particles(300,2000)
